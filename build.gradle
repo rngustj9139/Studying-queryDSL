@@ -1,7 +1,16 @@
+// querydsl 설정
+buildscript {
+	ext {
+		queryDslVersion = "5.0.0"
+	}
+}
+
 plugins {
 	id 'java'
 	id 'org.springframework.boot' version '2.7.6'
 	id 'io.spring.dependency-management' version '1.0.15.RELEASE'
+	// querydsl용 플러그인 추가
+	id "com.ewerk.gradle.plugins.querydsl" version "1.0.10"
 }
 
 group = 'koo'
@@ -21,6 +30,9 @@ repositories {
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+	// querydsl용 의존성 추가
+	implementation "com.querydsl:querydsl-jpa:${queryDslVersion}"
+	annotationProcessor "com.querydsl:querydsl-apt:${queryDslVersion}"
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'com.h2database:h2'
 	annotationProcessor 'org.projectlombok:lombok'
@@ -30,3 +42,20 @@ dependencies {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+//querydsl 추가 시작 (빌드를 위한 설정 추가 Q파일 생성)
+def querydslDir = "$buildDir/generated/querydsl"
+querydsl {
+	jpa = true
+	querydslSourcesDir = querydslDir
+}
+sourceSets {
+	main.java.srcDir querydslDir
+}
+configurations {
+	querydsl.extendsFrom compileClasspath
+}
+compileQuerydsl {
+	options.annotationProcessorPath = configurations.querydsl
+}
+//querydsl 추가 끝
