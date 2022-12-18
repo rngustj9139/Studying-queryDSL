@@ -170,4 +170,22 @@ public class QuerydslBasicTest {
         Assertions.assertThat(result.size()).isEqualTo(2);
     }
 
+    @Test
+    public void paging2() {
+        JPAQueryFactory queryFactory = new JPAQueryFactory(em);
+        QMember member = QMember.member;
+
+        QueryResults<Member> fetchResults = queryFactory
+                .selectFrom(member)
+                .orderBy(member.username.desc())
+                .offset(1) // 1부터 시작
+                .limit(2)
+                .fetchResults();
+
+        Assertions.assertThat(fetchResults.getTotal()).isEqualTo(4);
+        Assertions.assertThat(fetchResults.getLimit()).isEqualTo(2);
+        Assertions.assertThat(fetchResults.getOffset()).isEqualTo(1);
+        Assertions.assertThat(fetchResults.getResults().size()).isEqualTo(2);
+    }
+
 }
