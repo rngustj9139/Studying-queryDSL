@@ -54,11 +54,38 @@ public class QuerydslBasicTest {
         JPAQueryFactory queryFactory = new JPAQueryFactory(em);
         // Q 타입을 통해 컴파일 시점에 에러를 잡을 수 있게 한다.
         QMember m = new QMember("m");// QMember가 없을 경우 Tasks/Other/compileQuerydsl을 더블 클릭해야한다. (m은 어떤 QMember인지 이름을 부여한 것이다.)
+//      QMember m2 = QMember.member; // 이방법도 사용가능 혹은 static import 하기
 
         Member findMember = queryFactory
                 .select(m)
                 .from(m)
-                .where(m.username.eq("member1")) // 파라미터 바인딩 처리를 통해 sql 인젝션을 예방
+                .where(m.username.eq("member1")) // 파라미터 바인딩 처리를 통해 sql 인젝션을 예방 (테스트 데이터 이미 들어가 있다.)
+                .fetchOne();
+
+        Assertions.assertThat(findMember.getUsername()).isEqualTo("member1");
+    }
+
+    @Test
+    public void search() {
+        JPAQueryFactory queryFactory = new JPAQueryFactory(em);
+        QMember member = QMember.member;
+
+        Member findMember = queryFactory
+                .selectFrom(member) // select랑 from을 합침
+                .where(member.username.eq("member1").and(member.age.eq(10)))
+                .fetchOne();
+
+        Assertions.assertThat(findMember.getUsername()).isEqualTo("member1");
+    }
+
+    @Test
+    public void searchAndParam() {
+        JPAQueryFactory queryFactory = new JPAQueryFactory(em);
+        QMember member = QMember.member;
+
+        Member findMember = queryFactory
+                .selectFrom(member) // select랑 from을 합침
+                .where(member.username.eq("member1"), member.age.eq(10)) // and() 말고 쉼표 사용 가능
                 .fetchOne();
 
         Assertions.assertThat(findMember.getUsername()).isEqualTo("member1");
