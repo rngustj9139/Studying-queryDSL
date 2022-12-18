@@ -155,4 +155,19 @@ public class QuerydslBasicTest {
         Assertions.assertThat(memberNull.getUsername()).isNull();
     }
 
+    @Test
+    public void paging1() {
+        JPAQueryFactory queryFactory = new JPAQueryFactory(em);
+        QMember member = QMember.member;
+
+        List<Member> result = queryFactory
+                .selectFrom(member)
+                .orderBy(member.username.desc())
+                .offset(1) // 1부터 시작
+                .limit(2)
+                .fetch();
+
+        Assertions.assertThat(result.size()).isEqualTo(2);
+    }
+
 }
