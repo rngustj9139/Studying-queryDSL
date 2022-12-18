@@ -1,5 +1,6 @@
 package koo.basicquerydsl;
 
+import com.querydsl.core.QueryResults;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import koo.basicquerydsl.entity.Member;
 import koo.basicquerydsl.entity.QMember;
@@ -72,7 +73,7 @@ public class QuerydslBasicTest {
 
         Member findMember = queryFactory
                 .selectFrom(member) // select랑 from을 합침
-                .where(member.username.eq("member1").and(member.age.eq(10)))
+                .where(member.username.eq("member1").and(member.age.eq(10))) // not equal은 nq
                 .fetchOne();
 
         Assertions.assertThat(findMember.getUsername()).isEqualTo("member1");
@@ -85,10 +86,41 @@ public class QuerydslBasicTest {
 
         Member findMember = queryFactory
                 .selectFrom(member) // select랑 from을 합침
-                .where(member.username.eq("member1"), member.age.eq(10)) // and() 말고 쉼표 사용 가능
+                .where(member.username.eq("member1"),
+                       member.age.eq(10)) // and() 말고 쉼표 사용 가능
                 .fetchOne();
 
         Assertions.assertThat(findMember.getUsername()).isEqualTo("member1");
+    }
+
+    @Test
+    public void resultFetch() {
+        JPAQueryFactory queryFactory = new JPAQueryFactory(em);
+        QMember member = QMember.member;
+
+        List<Member> fetch = queryFactory
+                .selectFrom(member)
+                .fetch();// fetch() => 결과를 리스트로 조회 (결과가 없으면 빈 리스트 반환)
+
+        Member fetchOne = queryFactory
+                .selectFrom(member)
+                .fetchOne();// fetchOne() => 결과 단건 조회 (결과가 없으면 에러 발생)
+
+        Member fetchFirst = queryFactory
+                .selectFrom(member)
+                .fetchFirst();// fetchFirst() => 처음 한개만 조회
+
+        QueryResults<Member> fetchResults = queryFactory
+                .selectFrom(member)
+                .fetchResults(); //  fetchResults() => 페이징 기능 추가(totalCount 사용 가능)
+
+        long total = fetchResults.getTotal(); // totalCount 구하기
+        long limit = fetchResults.getLimit();
+        List<Member> results = fetchResults.getResults();
+
+        long fetchCount = queryFactory
+                .selectFrom(member)
+                .fetchCount(); // select count(m) from Member m 수행
     }
 
 }
