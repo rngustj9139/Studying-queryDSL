@@ -1,6 +1,7 @@
 package koo.basicquerydsl;
 
 import com.querydsl.core.QueryResults;
+import com.querydsl.core.Tuple;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import koo.basicquerydsl.entity.Member;
 import koo.basicquerydsl.entity.QMember;
@@ -186,6 +187,24 @@ public class QuerydslBasicTest {
         Assertions.assertThat(fetchResults.getLimit()).isEqualTo(2);
         Assertions.assertThat(fetchResults.getOffset()).isEqualTo(1);
         Assertions.assertThat(fetchResults.getResults().size()).isEqualTo(2);
+    }
+
+    @Test
+    public void aggregation() { // 집합
+        JPAQueryFactory queryFactory = new JPAQueryFactory(em);
+        QMember member = QMember.member;
+
+        List<Tuple> result = queryFactory // 튜플은 queryDSL이 제공하는 튜플이다.
+                .select(member.count(), member.age.sum(), member.age.avg(), member.age.max(), member.age.min())
+                .from(member)
+                .fetch();
+
+        Tuple tuple = result.get(0);
+        Assertions.assertThat(tuple.get(member.count())).isEqualTo(4);
+        Assertions.assertThat(tuple.get(member.age.sum())).isEqualTo(100);
+        Assertions.assertThat(tuple.get(member.age.avg())).isEqualTo(25);
+        Assertions.assertThat(tuple.get(member.age.max())).isEqualTo(40);
+        Assertions.assertThat(tuple.get(member.age.min())).isEqualTo(10);
     }
 
 }
