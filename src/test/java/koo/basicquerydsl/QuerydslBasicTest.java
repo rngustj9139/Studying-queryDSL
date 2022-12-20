@@ -220,7 +220,7 @@ public class QuerydslBasicTest {
         List<Tuple> result = queryFactory
                 .select(team.name, member.age.avg())
                 .from(member)
-                .join(member.team, team)
+                .join(member.team, team) // 첫번째 파라미터에 조인 대상을 지정하고, 두번째 파라미터에 별칭으로 사용할 Q타입을 지정하면 된다.
                 .groupBy(team.name) // 팀의 이름으로 그룹핑
                 .fetch();
 
@@ -232,6 +232,23 @@ public class QuerydslBasicTest {
 
         Assertions.assertThat(teamB.get(team.name)).isEqualTo("teamB");
         Assertions.assertThat(teamB.get(member.age.avg())).isEqualTo(15);
+    }
+
+    @Test
+    public void join() {
+        JPAQueryFactory queryFactory = new JPAQueryFactory(em);
+        QMember member = QMember.member;
+        QTeam team = QTeam.team;
+
+        List<Member> result = queryFactory
+                .selectFrom(member)
+                .join(member.team, team) // 첫번째 파라미터에 조인 대상을 지정하고, 두번째 파라미터에 별칭으로 사용할 Q타입을 지정하면 된다.
+                .where(team.name.eq("teamA"))
+                .fetch();
+
+        Assertions.assertThat(result)
+                .extracting("username")
+                .containsExactly("member1", "member2");
     }
 
 }
