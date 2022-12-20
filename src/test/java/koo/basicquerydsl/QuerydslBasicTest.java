@@ -251,4 +251,28 @@ public class QuerydslBasicTest {
                 .containsExactly("member1", "member2");
     }
 
+    /**
+     * 세타 조인(연관 관계가 없어도 조인 가능)
+     * 회원의 이름이 팀 이름과 같은 회원을 조회
+     **/
+    @Test
+    public void theta_join() {
+        JPAQueryFactory queryFactory = new JPAQueryFactory(em);
+        QMember member = QMember.member;
+        QTeam team = QTeam.team;
+
+        em.persist(new Member("teamA"));
+        em.persist(new Member("teamB"));
+
+        List<Member> result = queryFactory
+                .select(member)
+                .from(member, team) // 세타 조인 수행
+                .where(member.username.eq(team.name))
+                .fetch();
+
+        Assertions.assertThat(result)
+                .extracting("username")
+                .containsExactly("teamA", "teamB");
+    }
+
 }
