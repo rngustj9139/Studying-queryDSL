@@ -266,13 +266,34 @@ public class QuerydslBasicTest {
 
         List<Member> result = queryFactory
                 .select(member)
-                .from(member, team) // 세타 조인 수행
+                .from(member, team) // 세타 조인 수행(막 조인 - 카테시안 곱)
                 .where(member.username.eq(team.name))
                 .fetch();
 
         Assertions.assertThat(result)
                 .extracting("username")
                 .containsExactly("teamA", "teamB");
+    }
+
+    /**
+     * 조인 - on 절
+     * on절을 통해 조인 대상 필터링과 연관관계가 없는 엔티티를 외부조인하기 위해 사용한다.
+    **/
+    @Test
+    public void join_on_filtering() { // 조인 대상 필터링, 예시) 회원과 팀을 조인하면서 팀 이름이 teamA인 팀만 조인하기, 회원은 모두 조회 (jpql: select m from Member m left join m.team t on t.name = 'teamA)
+        JPAQueryFactory queryFactory = new JPAQueryFactory(em);
+        QMember member = QMember.member;
+        QTeam team = QTeam.team;
+
+        List<Tuple> result = queryFactory
+                .select(member, team)
+                .from(member)
+                .leftJoin(member.team, team).on(team.name.eq("teamA"))
+                .fetch();
+
+        for (Tuple tuple : result) {
+            System.out.println("tuple = " + tuple);
+        }
     }
 
 }
