@@ -398,10 +398,27 @@ public class QuerydslBasicTest {
                                 .from(memberSub)
                 ))
                 .fetch();
+    }
+
+    @Test
+    public void subQueryIn() { // 서브 쿼리(쿼리 안에 쿼리 넣음) => JPAExpressions 사용해야함, where 절 안에 새로운 쿼리를 넣음(alias가 겹치지 않게 해야함)
+        JPAQueryFactory queryFactory = new JPAQueryFactory(em);
+        QMember member = QMember.member;
+        QMember memberSub = new QMember("memberSub");
+
+        List<Member> result = queryFactory
+                .selectFrom(member)
+                .where(member.age.in( // in 절 사용
+                        JPAExpressions
+                                .select(memberSub.age)
+                                .from(memberSub)
+                                .where(memberSub.age.gt(10))
+                ))
+                .fetch();
 
         Assertions.assertThat(result)
                 .extracting("age")
-                .containsExactly(40);
+                .containsExactly(20, 30, 40);
     }
 
 }
