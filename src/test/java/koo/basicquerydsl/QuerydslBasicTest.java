@@ -14,7 +14,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceUnit;
 import java.util.List;
 
 @SpringBootTest
@@ -266,7 +268,7 @@ public class QuerydslBasicTest {
 
         List<Member> result = queryFactory
                 .select(member)
-                .from(member, team) // 세타 조인 수행(막 조인 - 카테시안 곱)
+                .from(member, team) // 세타 조인 수행(막 조인 - 카테시안 곱) (세타 조인에서는 left outer 조인이나 right outer 조인이 안된다.)
                 .where(member.username.eq(team.name))
                 .fetch();
 
@@ -288,12 +290,71 @@ public class QuerydslBasicTest {
         List<Tuple> result = queryFactory
                 .select(member, team)
                 .from(member)
-                .leftJoin(member.team, team).on(team.name.eq("teamA"))
+                .leftJoin(member.team, team).on(team.name.eq("teamA")) // 그냥 내부 조인(inner join)을 쓸 경우 where절로 대체 가능하다.
                 .fetch();
 
         for (Tuple tuple : result) {
             System.out.println("tuple = " + tuple);
         }
+    }
+
+    @Test
+    public void join_on_no_relation() { // 연관관게 없는 엔티티 외부 조인(join - on) (ex: 회원의 이름이 팀 이름과 같은 대상 left outer 조인)
+        JPAQueryFactory queryFactory = new JPAQueryFactory(em);
+        QMember member = QMember.member;
+        QTeam team = QTeam.team;
+
+        em.persist(new Member("teamA"));
+        em.persist(new Member("teamB"));
+        em.persist(new Member("teamC"));
+
+        List<Tuple> result = queryFactory
+                .select(member, team)
+                .from(member)
+                .leftJoin(team).on(member.username.eq(team.name))
+                .where(member.username.eq(team.name))
+                .fetch();
+    }
+
+    @PersistenceUnit
+    EntityManagerFactory emf;
+
+    @Test
+    public void fetchJoinNo() { // 페치 조인이 없을 때
+        em.flush();
+        em.clear();
+
+        JPAQueryFactory queryFactory = new JPAQueryFactory(em);
+        QMember member = QMember.member;
+
+        Member findMember = queryFactory
+                .selectFrom(member)
+                .where(member.username.eq("member1"))
+                .fetchOne();
+
+        boolean isLoaded = emf.getPersistenceUnitUtil().isLoaded(findMember.getTeam()); // Team 객체가 초기화 되었는지 확인(지연로딩이므로 false이다.)
+
+        Assertions.assertThat(isLoaded).isFalse(); // 페치 조인 미적용이므로 false
+    }
+
+    @Test
+    public void fetchJoinUse() { // 페치 조인 적용
+        em.flush();
+        em.clear();
+
+        JPAQueryFactory queryFactory = new JPAQueryFactory(em);
+        QMember member = QMember.member;
+        QTeam team = QTeam.team;
+
+        Member findMember = queryFactory
+                .selectFrom(member)
+                .join(member.team, team).fetchJoin() // 페치 조인을 적용했으므로 team의 프록시가 실제 객체로 초기화됨(member, team 둘다 한번에 select로 가져온다.)
+                .where(member.username.eq("member1"))
+                .fetchOne();
+
+        boolean isLoaded = emf.getPersistenceUnitUtil().isLoaded(findMember.getTeam());
+
+        Assertions.assertThat(isLoaded).isTrue();
     }
 
 }
