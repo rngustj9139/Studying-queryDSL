@@ -2,6 +2,7 @@ package koo.basicquerydsl;
 
 import com.querydsl.core.QueryResults;
 import com.querydsl.core.Tuple;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import koo.basicquerydsl.entity.Member;
 import koo.basicquerydsl.entity.QMember;
@@ -355,6 +356,29 @@ public class QuerydslBasicTest {
         boolean isLoaded = emf.getPersistenceUnitUtil().isLoaded(findMember.getTeam());
 
         Assertions.assertThat(isLoaded).isTrue();
+    }
+
+    /**
+     * 나이가 가장 많은 회원 조회회
+    **/
+    @Test
+    public void subQuery() { // 서브 쿼리(쿼리 안에 쿼리 넣음) => JPAExpressions 사용해야함, where 절 안에 새로운 쿼리를 넣음(alias가 겹치지 않게 해야함)
+        JPAQueryFactory queryFactory = new JPAQueryFactory(em);
+        QMember member = QMember.member;
+        QMember memberSub = new QMember("memberSub");
+
+        List<Member> result = queryFactory
+                .selectFrom(member)
+                .where(member.age.eq(
+                        JPAExpressions
+                                .select(memberSub.age.max())
+                                .from(memberSub)
+                ))
+                .fetch();
+
+        Assertions.assertThat(result)
+                .extracting("age")
+                .containsExactly(40);
     }
 
 }
