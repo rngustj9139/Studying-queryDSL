@@ -421,4 +421,31 @@ public class QuerydslBasicTest {
                 .containsExactly(20, 30, 40);
     }
 
+    /**
+     * 결과
+     * tuple = [member1, 25.0]
+     * tuple = [member2, 25.0]
+     * tuple = [member3, 25.0]
+     * tuple = [member4, 25.0]
+     **/
+    @Test
+    public void selectSubQuery() {
+        JPAQueryFactory queryFactory = new JPAQueryFactory(em);
+        QMember member = QMember.member;
+        QMember memberSub = new QMember("memberSub");
+
+        List<Tuple> result = queryFactory
+                .select(member.username,
+                        JPAExpressions
+                                .select(memberSub.age.avg())
+                                .from(memberSub)
+                )
+                .from(member)
+                .fetch();
+
+        for (Tuple tuple : result) {
+            System.out.println("tuple = " + tuple);
+        }
+    }
+
 }
