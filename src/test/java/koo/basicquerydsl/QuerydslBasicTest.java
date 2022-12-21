@@ -359,7 +359,7 @@ public class QuerydslBasicTest {
     }
 
     /**
-     * 나이가 가장 많은 회원 조회회
+     * 나이가 가장 많은 회원 조회
     **/
     @Test
     public void subQuery() { // 서브 쿼리(쿼리 안에 쿼리 넣음) => JPAExpressions 사용해야함, where 절 안에 새로운 쿼리를 넣음(alias가 겹치지 않게 해야함)
@@ -372,6 +372,29 @@ public class QuerydslBasicTest {
                 .where(member.age.eq(
                         JPAExpressions
                                 .select(memberSub.age.max())
+                                .from(memberSub)
+                ))
+                .fetch();
+
+        Assertions.assertThat(result)
+                .extracting("age")
+                .containsExactly(40);
+    }
+
+    /**
+     * 나이가 평균 이상인 회원 조회
+     **/
+    @Test
+    public void subQueryGtAvg() { // 서브 쿼리(쿼리 안에 쿼리 넣음) => JPAExpressions 사용해야함, where 절 안에 새로운 쿼리를 넣음(alias가 겹치지 않게 해야함)
+        JPAQueryFactory queryFactory = new JPAQueryFactory(em);
+        QMember member = QMember.member;
+        QMember memberSub = new QMember("memberSub");
+
+        List<Member> result = queryFactory
+                .selectFrom(member)
+                .where(member.age.goe(
+                        JPAExpressions
+                                .select(memberSub.age.avg())
                                 .from(memberSub)
                 ))
                 .fetch();
