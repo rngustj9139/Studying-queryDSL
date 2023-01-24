@@ -79,7 +79,7 @@ public class QuerydslBasicTest {
 
         Member findMember = queryFactory
                 .selectFrom(member) // select랑 from을 합침
-                .where(member.username.eq("member1").and(member.age.eq(10))) // not equal은 nq
+                .where(member.username.eq("member1").and(member.age.eq(10))) // not equal은 nq이 외에 in, notIn, between, goe, loe, gt, lt 사용 가능
                 .fetchOne();
 
         Assertions.assertThat(findMember.getUsername()).isEqualTo("member1");
@@ -123,7 +123,7 @@ public class QuerydslBasicTest {
 
         Member fetchOne = queryFactory
                 .selectFrom(member)
-                .fetchOne();// fetchOne() => 결과 단건 조회 (결과가 없으면 에러 발생)
+                .fetchOne();// fetchOne() => 결과 단건 조회 (결과가 없으면 null이고 결과가 둘 이상이면 에러 발생)
 
         Member fetchFirst = queryFactory
                 .selectFrom(member)
