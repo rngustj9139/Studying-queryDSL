@@ -86,6 +86,19 @@ public class QuerydslBasicTest {
     }
 
     @Test
+    public void search2() {
+        JPAQueryFactory queryFactory = new JPAQueryFactory(em);
+        QMember m = QMember.member;
+
+        Member findMember = queryFactory
+                .selectFrom(m)
+                .where(m.username.contains("ber2"))
+                .fetchOne();
+
+        Assertions.assertThat(findMember.getUsername()).isEqualTo("member2");
+    }
+
+    @Test
     public void searchAndParam() {
         JPAQueryFactory queryFactory = new JPAQueryFactory(em);
         QMember member = QMember.member;

@@ -44,7 +44,7 @@ tasks.named('test') {
 	useJUnitPlatform()
 }
 
-//querydsl 추가 시작 (빌드를 위한 설정 추가 Q파일 생성)
+//querydsl 추가 시작 (빌드를 위한 설정 추가, 빌드 후 Q파일 생성)
 def querydslDir = "$buildDir/generated/querydsl"
 querydsl {
 	jpa = true
