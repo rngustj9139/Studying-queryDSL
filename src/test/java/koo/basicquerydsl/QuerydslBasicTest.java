@@ -3,6 +3,7 @@ package koo.basicquerydsl;
 import com.querydsl.core.QueryResults;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.dsl.CaseBuilder;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import koo.basicquerydsl.entity.Member;
@@ -146,7 +147,7 @@ public class QuerydslBasicTest {
      * 회원 정렬 순서
      * 1. 회원 나이 내림차순(desc)
      * 2. 회원 이름 오름차순(asc)
-     * 단 2에서 회원 이름이 없으면 마지막에 출력(nulls last)
+     * 3. 단 2에서 회원 이름이 없으면 마지막에 출력(nulls last)
      **/
     @Test
     public void sort() {
@@ -237,9 +238,14 @@ public class QuerydslBasicTest {
         List<Tuple> result = queryFactory
                 .select(team.name, member.age.avg())
                 .from(member)
-                .join(member.team, team) // 첫번째 파라미터에 조인 대상을 지정하고, 두번째 파라미터에 별칭으로 사용할 Q타입을 지정하면 된다.
+                .join(member.team, team) // member의 team과 team을 조인
                 .groupBy(team.name) // 팀의 이름으로 그룹핑
                 .fetch();
+
+        /**
+         * .groupBy(item.price)
+         * .having(item.price.gt(1000))
+         */
 
         Tuple teamA = result.get(0);
         Tuple teamB = result.get(1);
@@ -283,7 +289,7 @@ public class QuerydslBasicTest {
 
         List<Member> result = queryFactory
                 .select(member)
-                .from(member, team) // 세타 조인 수행(막 조인 - 카테시안 곱) (세타 조인에서는 left outer 조인이나 right outer 조인이 안된다.)
+                .from(member, team) // 세타 조인 수행(막 조인 - 카테시안 곱) (세타 조인에서는 left outer 조인이나 right outer 조인이 안된다. 최신 하이버네이트에서는 가능)
                 .where(member.username.eq(team.name))
                 .fetch();
 
@@ -305,7 +311,7 @@ public class QuerydslBasicTest {
         List<Tuple> result = queryFactory
                 .select(member, team)
                 .from(member)
-                .leftJoin(member.team, team).on(team.name.eq("teamA")) // 그냥 내부 조인(inner join)을 쓸 경우 where절로 대체 가능하다.
+                .leftJoin(member.team, team).on(team.name.eq("teamA")) // 그냥 내부 조인(inner join)을 쓸 경우 on절 대신 where절로 대체 가능하다.
                 .fetch();
 
         for (Tuple tuple : result) {
@@ -326,7 +332,7 @@ public class QuerydslBasicTest {
         List<Tuple> result = queryFactory
                 .select(member, team)
                 .from(member)
-                .leftJoin(team).on(member.username.eq(team.name))
+                .leftJoin(team).on(member.username.eq(team.name)) // on절을 활용한 막 조인
                 .where(member.username.eq(team.name))
                 .fetch();
     }
@@ -349,7 +355,7 @@ public class QuerydslBasicTest {
 
         boolean isLoaded = emf.getPersistenceUnitUtil().isLoaded(findMember.getTeam()); // Team 객체가 초기화 되었는지 확인(지연로딩이므로 false이다.)
 
-        Assertions.assertThat(isLoaded).isFalse(); // 페치 조인 미적용이므로 false
+        Assertions.assertThat(isLoaded).as("페치 조인 미적용").isFalse(); // 페치 조인 미적용이므로 false
     }
 
     @Test
@@ -369,7 +375,7 @@ public class QuerydslBasicTest {
 
         boolean isLoaded = emf.getPersistenceUnitUtil().isLoaded(findMember.getTeam());
 
-        Assertions.assertThat(isLoaded).isTrue();
+        Assertions.assertThat(isLoaded).as("페치 조인 적용").isTrue();
     }
 
     /**
@@ -463,7 +469,7 @@ public class QuerydslBasicTest {
     }
 
     @Test
-    public void basicCase() { // case문 이용
+    public void basicCase() { // 단순한 case문 이용
         JPAQueryFactory queryFactory = new JPAQueryFactory(em);
         QMember member = QMember.member;
 
@@ -493,6 +499,44 @@ public class QuerydslBasicTest {
                         .otherwise("기타")
                 )
                 .from(member)
+                .fetch();
+
+        for (String s : result) {
+            System.out.println("s = " + s);
+        }
+    }
+
+    @Test
+    public void constant() { // 상수 더하기
+        JPAQueryFactory queryFactory = new JPAQueryFactory(em);
+        QMember member = QMember.member;
+
+        List<Tuple> result = queryFactory
+                .select(member.username, Expressions.constant("A")) // 상수 "A"를 추가
+                .from(member)
+                .fetch();
+
+        for (Tuple tuple : result) {
+            System.out.println("tuple = " + tuple);
+            /**
+             * 결과
+             * tuple = [member1, A]
+             * tuple = [member2, A]
+             * tuple = [member3, A]
+             * tuple = [member4, A]
+             */
+        }
+    }
+
+    @Test
+    public void concat() { // 문자 더하기
+        JPAQueryFactory queryFactory = new JPAQueryFactory(em);
+        QMember member = QMember.member;
+
+        List<String> result = queryFactory
+                .select(member.username.concat("_").concat(member.age.stringValue())) // .select(member.username.concat("_").concat(member.age)) 는 불가능 => concat은 문자만 가능하기 때문에
+                .from(member)
+                .where(member.username.eq("member1"))
                 .fetch();
 
         for (String s : result) {
