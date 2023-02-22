@@ -2,6 +2,7 @@ package koo.basicquerydsl;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
+import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import koo.basicquerydsl.dto.MemberDto;
@@ -146,6 +147,7 @@ public class QuerydslIntermediateLevelTest { // queryDSL 중급 문법
 
     private List<Member> searchMember1(String usernameParam, Integer ageParam) {
         BooleanBuilder builder = new BooleanBuilder();
+//      BooleanBuilder builder = new BooleanBuilder(member.username.eq(usernameParam)); // 필수 값 지정
 
         if (usernameParam != null) {
             builder.and(member.username.eq(usernameParam));
@@ -159,6 +161,37 @@ public class QuerydslIntermediateLevelTest { // queryDSL 중급 문법
                     .selectFrom(member)
                     .where()
                     .fetch();
+    }
+
+    @Test
+    public void dynamicQuery_WhereParam() { // 동적 쿼리 - where 다중 파라미터 사용
+        String usernameParam = "member1";
+        Integer ageParam = 10;
+
+        List<Member> result = searchMember2(usernameParam, ageParam);
+
+        Assertions.assertThat(result.size()).isEqualTo(1);
+    }
+
+    private List<Member> searchMember2(String usernameParam, Integer ageParam) {
+        return queryFactory
+                .selectFrom(member)
+                .where(usernameEq(usernameParam), ageEq(ageParam))
+                .fetch();
+    }
+
+    private Predicate usernameEq(String usernameParam) { // predicate란 argument를 받아 boolean 값을 리턴하는 함수형 인터페이스(1개의 추상 메소드를 갖고 있는 인터페이스)이다.
+        if (usernameParam != null) {
+            return member.username.eq(usernameParam);
+        } else {
+            return null;
+        }
+
+//      return usernameParam != null ? member.username.eq(usernameParam) : null; // 삼항 연산자 이용
+    }
+
+    private Predicate ageEq(Integer ageParam) {
+        return ageParam != null ? member.age.eq(ageParam) : null;
     }
 
 }
