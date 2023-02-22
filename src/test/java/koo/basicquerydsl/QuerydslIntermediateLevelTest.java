@@ -1,5 +1,6 @@
 package koo.basicquerydsl;
 
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -7,6 +8,7 @@ import koo.basicquerydsl.dto.MemberDto;
 import koo.basicquerydsl.dto.QMemberDto;
 import koo.basicquerydsl.entity.Member;
 import koo.basicquerydsl.entity.QMember;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,7 +35,7 @@ public class QuerydslIntermediateLevelTest { // queryDSL 중급 문법
     @Test
     public void simpleProjection() { // 프로젝션 대상이 한개인 경우
         List<String> result = queryFactory
-                .select(member.username)
+                .select(member.username) // .select().distinct()
                 .from(member)
                 .fetch();
 
@@ -130,6 +132,33 @@ public class QuerydslIntermediateLevelTest { // queryDSL 중급 문법
         for (MemberDto memberDto : result) {
             System.out.println("memberDto = " + memberDto);
         }
+    }
+
+    @Test
+    public void dynamicQuery_BooleanBuilder() { // 동적 쿼리 - BooleanBuilder 이용
+        String usernameParam = "member1";
+        Integer ageParam = 10;
+
+        List<Member> result = searchMember1(usernameParam, ageParam);
+
+        Assertions.assertThat(result.size()).isEqualTo(1);
+    }
+
+    private List<Member> searchMember1(String usernameParam, Integer ageParam) {
+        BooleanBuilder builder = new BooleanBuilder();
+
+        if (usernameParam != null) {
+            builder.and(member.username.eq(usernameParam));
+        }
+
+        if (ageParam != null) {
+            builder.and(member.age.eq(ageParam));
+        }
+
+        return queryFactory
+                    .selectFrom(member)
+                    .where()
+                    .fetch();
     }
 
 }
