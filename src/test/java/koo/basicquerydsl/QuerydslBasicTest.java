@@ -24,7 +24,7 @@ import java.util.List;
 
 @SpringBootTest
 @Transactional
-public class QuerydslBasicTest {
+public class QuerydslBasicTest { // queryDSL 기본 문법
 
     @PersistenceContext
     EntityManager em;
