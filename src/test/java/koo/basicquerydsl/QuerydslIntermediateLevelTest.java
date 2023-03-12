@@ -246,5 +246,31 @@ public class QuerydslIntermediateLevelTest { // queryDSL 중급 문법
         }
     }
 
+    @Test
+    public void sqlFunction2() {
+        List<String> results = queryFactory
+                .select(member.username)
+                .from(member)
+                .where(member.username.eq(Expressions.stringTemplate("function('lower', {0})", member.username)))
+                .fetch();
+
+        for (String result : results) {
+            System.out.println("result = " + result);
+        }
+    }
+    
+    @Test
+    public void sqlFunction3() { // sqlFunction2를 아래와 같이 바꿀 수 있음(queryDSL 내장 기능)
+        List<String> results = queryFactory
+                .select(member.username)
+                .from(member)
+                .where(member.username.eq(member.username.lower()))
+                .fetch();
+
+        for (String result : results) {
+            System.out.println("result = " + result);
+        }
+    }
+
 }
 
