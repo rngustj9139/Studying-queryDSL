@@ -217,8 +217,20 @@ public class QuerydslIntermediateLevelTest { // queryDSL 중급 문법
     public void bulkAdd() {
         long cnt = queryFactory
                 .update(member)
-                .set(member.age, member.age.add(1))
+                .set(member.age, member.age.add(1)) // 곱하기는 multiply
                 .execute();
+
+        Assertions.assertThat(cnt).isEqualTo(4);
+    }
+
+    @Test
+    public void bulkDelete() {
+        long cnt = queryFactory
+                .delete(member)
+                .where(member.age.gt(18))
+                .execute();
+
+        Assertions.assertThat(cnt).isEqualTo(2);
     }
 
 }
