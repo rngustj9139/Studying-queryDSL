@@ -5,6 +5,7 @@ import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import koo.basicquerydsl.dto.MemberDto;
 import koo.basicquerydsl.dto.QMemberDto;
@@ -230,7 +231,19 @@ public class QuerydslIntermediateLevelTest { // queryDSL 중급 문법
                 .where(member.age.gt(18))
                 .execute();
 
-        Assertions.assertThat(cnt).isEqualTo(2);
+        Assertions.assertThat(cnt).isEqualTo(3);
+    }
+
+    @Test
+    public void sqlFunction() { // queryDSL에서 SQL function 호출
+        List<String> results = queryFactory // member.username에서 member라는 단어를 M으로 교체
+                .select(Expressions.stringTemplate("function('replace', {0}, {1}, {2})", member.username, "member", "M"))
+                .from(member)
+                .fetch();
+
+        for (String result : results) {
+            System.out.println("result = " + result);
+        }
     }
 
 }
