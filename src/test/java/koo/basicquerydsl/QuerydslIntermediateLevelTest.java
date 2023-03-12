@@ -174,6 +174,7 @@ public class QuerydslIntermediateLevelTest { // queryDSL 중급 문법
         Assertions.assertThat(result.size()).isEqualTo(1);
     }
 
+    @Test
     public List<Member> searchMember2(String usernameParam, Integer ageParam) {
         return queryFactory
                 .selectFrom(member)
@@ -181,6 +182,7 @@ public class QuerydslIntermediateLevelTest { // queryDSL 중급 문법
                 .fetch();
     }
 
+    @Test
     public BooleanExpression usernameEq(String usernameParam) {
         if (usernameParam != null) {
             return member.username.eq(usernameParam);
@@ -191,10 +193,12 @@ public class QuerydslIntermediateLevelTest { // queryDSL 중급 문법
 //      return usernameParam != null ? member.username.eq(usernameParam) : null; // 삼항 연산자 이용
     }
 
+    @Test
     public BooleanExpression ageEq(Integer ageParam) {
         return ageParam != null ? member.age.eq(ageParam) : null;
     }
 
+    @Test
     public void bulkUpdate() { // 수정, 삭제 벌크 연산 (영속성 컨텍스트를 무시하고 바로 DB에 쿼리를 날림, DB 속 데이터와 영속성 컨텍스트 내의 엔티티의 상태가 달라짐)
         long cnt = queryFactory
                 .update(member)
@@ -207,6 +211,14 @@ public class QuerydslIntermediateLevelTest { // queryDSL 중급 문법
         em.clear();
 
         Assertions.assertThat(cnt).isEqualTo(2);
+    }
+
+    @Test
+    public void bulkAdd() {
+        long cnt = queryFactory
+                .update(member)
+                .set(member.age, member.age.add(1))
+                .execute();
     }
 
 }
