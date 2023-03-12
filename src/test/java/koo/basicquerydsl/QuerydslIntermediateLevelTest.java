@@ -195,12 +195,18 @@ public class QuerydslIntermediateLevelTest { // queryDSL 중급 문법
         return ageParam != null ? member.age.eq(ageParam) : null;
     }
 
-    public void bulkUpdate() { // 수정, 삭제 벌크 연산
-        queryFactory
+    public void bulkUpdate() { // 수정, 삭제 벌크 연산 (영속성 컨텍스트를 무시하고 바로 DB에 쿼리를 날림, DB 속 데이터와 영속성 컨텍스트 내의 엔티티의 상태가 달라짐)
+        long cnt = queryFactory
                 .update(member)
                 .set(member.username, "비회원")
                 .where(member.age.lt(28))
                 .execute();
+
+        // DB 속 데이터와 영속성 컨텍스트 내의 엔티티와의 상태 맞추기
+        em.flush();
+        em.clear();
+
+        Assertions.assertThat(cnt).isEqualTo(2);
     }
 
 }
