@@ -4,6 +4,7 @@ import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import koo.basicquerydsl.dto.MemberDto;
 import koo.basicquerydsl.dto.QMemberDto;
@@ -173,14 +174,14 @@ public class QuerydslIntermediateLevelTest { // queryDSL 중급 문법
         Assertions.assertThat(result.size()).isEqualTo(1);
     }
 
-    private List<Member> searchMember2(String usernameParam, Integer ageParam) {
+    public List<Member> searchMember2(String usernameParam, Integer ageParam) {
         return queryFactory
                 .selectFrom(member)
                 .where(usernameEq(usernameParam), ageEq(ageParam))
                 .fetch();
     }
 
-    private Predicate usernameEq(String usernameParam) { // predicate란 argument를 받아 boolean 값을 리턴하는 함수형 인터페이스(1개의 추상 메소드를 갖고 있는 인터페이스)이다.
+    public BooleanExpression usernameEq(String usernameParam) {
         if (usernameParam != null) {
             return member.username.eq(usernameParam);
         } else {
@@ -190,8 +191,16 @@ public class QuerydslIntermediateLevelTest { // queryDSL 중급 문법
 //      return usernameParam != null ? member.username.eq(usernameParam) : null; // 삼항 연산자 이용
     }
 
-    private Predicate ageEq(Integer ageParam) {
+    public BooleanExpression ageEq(Integer ageParam) {
         return ageParam != null ? member.age.eq(ageParam) : null;
+    }
+
+    public void bulkUpdate() { // 수정, 삭제 벌크 연산
+        queryFactory
+                .update(member)
+                .set(member.username, "비회원")
+                .where(member.age.lt(28))
+                .execute();
     }
 
 }
