@@ -12,7 +12,7 @@ import java.util.List;
 public class MemberQueryDslRepository {
 
     private final EntityManager em;
-    private final JPAQueryFactory queryFactory; // 이걸 그냥 스프링 빈으로 등록해도 된다.
+    private final JPAQueryFactory queryFactory; // 이걸 그냥 스프링 빈으로 등록해도 된다. 그러면 @RequiredArgsConstruct 사용 가능
     private QMember member = QMember.member;
 
     public MemberQueryDslRepository(EntityManager em) {
