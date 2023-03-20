@@ -36,6 +36,10 @@ class MemberJpaRepositoryTest {
 
         Assertions.assertThat(result1.size()).isEqualTo(1);
         Assertions.assertThat(result1).containsExactly(member);
+
+        List<Member> result2 = memberJpaRepository.findByUsername("member1");
+
+        Assertions.assertThat(result2).containsExactly(member);
     }
 
 }
