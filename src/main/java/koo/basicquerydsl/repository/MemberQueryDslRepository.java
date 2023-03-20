@@ -1,6 +1,8 @@
 package koo.basicquerydsl.repository;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import koo.basicquerydsl.dto.MemberSearchCondition;
+import koo.basicquerydsl.dto.MemberTeamDto;
 import koo.basicquerydsl.entity.Member;
 import koo.basicquerydsl.entity.QMember;
 import org.springframework.stereotype.Repository;
@@ -31,6 +33,10 @@ public class MemberQueryDslRepository {
                 .selectFrom(member)
                 .where(member.username.eq(username))
                 .fetch();
+    }
+
+    public List<MemberTeamDto> searchByBuilder(MemberSearchCondition condition) {
+
     }
 
 }
