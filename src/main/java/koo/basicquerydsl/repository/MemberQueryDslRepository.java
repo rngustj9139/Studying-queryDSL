@@ -2,6 +2,7 @@ package koo.basicquerydsl.repository;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import koo.basicquerydsl.dto.MemberSearchCondition;
 import koo.basicquerydsl.dto.MemberTeamDto;
@@ -94,19 +95,19 @@ public class MemberQueryDslRepository {
                 .fetch();
     }
 
-    private Predicate usernameEq(String username) {
+    private BooleanExpression usernameEq(String username) {
         return StringUtils.hasText(username) ? member.username.eq(username) : null;
     }
 
-    private Predicate teamNameEq(String teamName) {
+    private BooleanExpression teamNameEq(String teamName) {
         return StringUtils.hasText(teamName) ? team.name.eq(teamName) : null;
     }
 
-    private Predicate ageGoe(Integer ageGoe) {
+    private BooleanExpression ageGoe(Integer ageGoe) {
         return ageGoe != null ? member.age.goe(ageGoe) : null;
     }
 
-    private Predicate ageLoe(Integer ageLoe) {
+    private BooleanExpression ageLoe(Integer ageLoe) {
         return ageLoe != null ? member.age.loe(ageLoe) : null;
     }
 
