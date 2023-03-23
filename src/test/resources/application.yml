@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: local # 샘플 데이터 추가가 테스트 케이스에 영향을 미치지 않게 프로파일 분리
+    active: test # 샘플 데이터 추가가 테스트 케이스에 영향을 미치지 않게 프로파일 분리
   datasource:
     url: jdbc:h2:tcp://localhost/~/basic_querydsl
     username: admin
