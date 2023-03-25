@@ -42,7 +42,7 @@ public class MemberQueryDslRepository {
                 .fetch();
     }
 
-    public List<MemberTeamDto> searchByBuilder(MemberSearchCondition condition) { // BooleanBuilder를 이용한 동적쿼리
+    public List<MemberTeamDto> searchByBuilder (MemberSearchCondition condition) { // BooleanBuilder를 이용한 동적쿼리
         BooleanBuilder builder = new BooleanBuilder();
 
         if (StringUtils.hasText(condition.getUsername())) {
@@ -75,7 +75,7 @@ public class MemberQueryDslRepository {
                 .fetch();
     }
 
-    public List<MemberTeamDto> search (MemberSearchCondition condition) { // where절 다중 파라미터를 활용한 동적 쿼리
+    public List<MemberTeamDto> searchByWhereParameter (MemberSearchCondition condition) { // where절 다중 파라미터를 활용한 동적 쿼리
         return queryFactory
                 .select(new QMemberTeamDto(
                         member.id.as("memberId"),
