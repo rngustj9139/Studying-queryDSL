@@ -95,7 +95,38 @@ public class MemberSpringDataJpaRepositoryImpl implements MemberSpringDataJpaRep
 
     @Override
     public Page<MemberTeamDto> searchPageComplex(MemberSearchCondition condition, Pageable pageable) { // 데이터 내용과 totalCount를 구하는 것을 분리한 Spring Data Jpa 페이징
-        return null;
+        List<MemberTeamDto> content = queryFactory
+                .select(new QMemberTeamDto(
+                        member.id.as("memberId"),
+                        member.username,
+                        member.age,
+                        team.id.as("teamId"),
+                        team.name.as("teamName")
+                ))
+                .from(member)
+                .leftJoin(member.team, team)
+                .where(
+                        usernameEq(condition.getUsername()),
+                        teamNameEq(condition.getTeamName()),
+                        ageGoe(condition.getAgeGoe()),
+                        ageLoe(condition.getAgeLoe())
+                )
+                .offset(pageable.getOffset()) // 어디서 부터 시작할 것인가
+                .limit(pageable.getPageSize()) // 몇개 씩 가져올 것인가
+                .fetch();// 여기서 차이점 발생!, fetch()를 쓰면 content만 가져온다. (fetchResults를 쓰면 content용 쿼리도 날리고 totalCount용 쿼리도 날린다.)
+
+        long total = queryFactory // totalCount 구하는 쿼리 따로 작성하기
+                .select(member)
+                .from(member)
+                .leftJoin(member.team, team)
+                .where(
+                        usernameEq(condition.getUsername()),
+                        teamNameEq(condition.getTeamName()),
+                        ageGoe(condition.getAgeGoe()),
+                        ageLoe(condition.getAgeLoe()))
+                .fetchCount();
+
+        return new PageImpl<>(content, pageable, total);
     }
 
 }
