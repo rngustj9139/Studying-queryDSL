@@ -136,10 +136,10 @@ public class MemberSpringDataJpaRepositoryImpl implements MemberSpringDataJpaRep
     }
 
     /**
-     * totalCount 쿼리가 생략 가능한 경우 생략해서 처리하기
-     * - 페이지 시작이면서 컨텐츠 사이즈가 페이지 사이즈보다 작을 때
+     * totalCount 쿼리가 생략 가능한 경우 생략해서 처리하기 (최적화)
+     * - 페이지 시작이면서 전체 컨텐츠 사이즈가 페이지 사이즈보다 작을 때
      * - 마지막 페이지 일때 (offset + 전체 컨텐츠 사이즈를 더해서 totalCount를 구함)
-     * - 아래와 같은 경우 위의 경우를 자동으로 처리해줌
+     * - 아래와 같은 경우 위의 경우를 자동으로 처리해줌(위의 경우일 때 totalCount를 구하는 쿼리를 호출하지 않는다.)
      */
     @Override
     public Page<MemberTeamDto> searchPageComplex2(MemberSearchCondition condition, Pageable pageable) {
