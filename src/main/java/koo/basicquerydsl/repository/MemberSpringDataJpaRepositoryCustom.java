@@ -12,5 +12,6 @@ public interface MemberSpringDataJpaRepositoryCustom { // Spring Data Jpa를 위
     List<MemberTeamDto> searchByWhereParameter(MemberSearchCondition condition);
     Page<MemberTeamDto> searchPageSimple(MemberSearchCondition condition, Pageable pageable); // 단순 Spring Data Jpa 페이징
     Page<MemberTeamDto> searchPageComplex(MemberSearchCondition condition, Pageable pageable); // 데이터 내용과 totalCount를 구하는 것을 분리한 Spring Data Jpa 페이징
+    Page<MemberTeamDto> searchPageComplex2(MemberSearchCondition condition, Pageable pageable); // 데이터 내용과 totalCount를 구하는 것을 분리한 Spring Data Jpa 페이징
 
 }
