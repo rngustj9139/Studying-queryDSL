@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-public interface MemberSprinDataJpaRepository extends JpaRepository<Member, Long> {
+public interface MemberSprinDataJpaRepository extends JpaRepository<Member, Long>, MemberSpringDataJpaRepositoryCustom {
 
     List<Member> findByUsername(String username);
 

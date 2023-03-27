@@ -1,5 +1,6 @@
 package koo.basicquerydsl.repository;
 
+import com.querydsl.core.QueryResults;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import koo.basicquerydsl.dto.MemberSearchCondition;
@@ -7,6 +8,9 @@ import koo.basicquerydsl.dto.MemberTeamDto;
 import koo.basicquerydsl.dto.QMemberTeamDto;
 import koo.basicquerydsl.entity.QMember;
 import koo.basicquerydsl.entity.QTeam;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.util.StringUtils;
 
 import javax.persistence.EntityManager;
@@ -59,6 +63,39 @@ public class MemberSpringDataJpaRepositoryImpl implements MemberSpringDataJpaRep
 
     private BooleanExpression ageLoe(Integer ageLoe) {
         return ageLoe != null ? member.age.loe(ageLoe) : null;
+    }
+
+    @Override
+    public Page<MemberTeamDto> searchPageSimple(MemberSearchCondition condition, Pageable pageable) { // 단순 Spring Data Jpa 페이징
+        QueryResults<MemberTeamDto> results = queryFactory
+                .select(new QMemberTeamDto(
+                        member.id.as("memberId"),
+                        member.username,
+                        member.age,
+                        team.id.as("teamId"),
+                        team.name.as("teamName")
+                ))
+                .from(member)
+                .leftJoin(member.team, team)
+                .where(
+                        usernameEq(condition.getUsername()),
+                        teamNameEq(condition.getTeamName()),
+                        ageGoe(condition.getAgeGoe()),
+                        ageLoe(condition.getAgeLoe())
+                )
+                .offset(pageable.getOffset()) // 어디서 부터 시작할 것인가
+                .limit(pageable.getPageSize()) // 몇개 씩 가져올 것인가
+                .fetchResults();// fetchResults를 쓰면 content용 쿼리도 날리고 totalCount용 쿼리도 날린다.
+
+        List<MemberTeamDto> content = results.getResults();
+        long total = results.getTotal();
+
+        return new PageImpl<>(content, pageable, total);
+    }
+
+    @Override
+    public Page<MemberTeamDto> searchPageComplex(MemberSearchCondition condition, Pageable pageable) { // 데이터 내용과 totalCount를 구하는 것을 분리한 Spring Data Jpa 페이징
+        return null;
     }
 
 }
