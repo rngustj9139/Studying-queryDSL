@@ -90,7 +90,7 @@ public class MemberSpringDataJpaRepositoryImpl implements MemberSpringDataJpaRep
         List<MemberTeamDto> content = results.getResults();
         long total = results.getTotal();
 
-        return new PageImpl<>(content, pageable, total);
+        return new PageImpl<>(content, pageable, total); // 테스트도 확인하기
     }
 
     @Override
