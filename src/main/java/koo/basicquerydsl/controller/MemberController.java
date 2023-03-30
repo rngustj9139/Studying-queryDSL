@@ -25,13 +25,13 @@ public class MemberController {
     }
 
     // /v2/members?page=0&size=5 형태로 요청하기
-    @GetMapping("/v2/members") // Spring Data Jpa의 페이징을 활용한 동적 쿼리 검색 (queryDSL)
+    @GetMapping("/v2/members") // Spring Data Jpa의 페이징을 활용하면서(페이징 구현) 동적 쿼리 검색 (queryDSL)
     public Page<MemberTeamDto> searchMemberV2(MemberSearchCondition condition, Pageable pageable) {
         return memberSprinDataJpaRepository.searchPageSimple(condition, pageable);
     }
 
     // /v3/members?page=0&size=5 형태로 요청하기
-    @GetMapping("/v3/members") // Spring Data Jpa의 페이징을 활용한 동적 쿼리 검색 (queryDSL)
+    @GetMapping("/v3/members") // Spring Data Jpa의 페이징을 활용하면서(페이징 구현) 동적 쿼리 검색 (queryDSL)
     public Page<MemberTeamDto> searchMemberV3(MemberSearchCondition condition, Pageable pageable) {
         return memberSprinDataJpaRepository.searchPageComplex(condition, pageable);
     }
