@@ -36,5 +36,4 @@ public class MemberController {
         return memberSprinDataJpaRepository.searchPageComplex(condition, pageable);
     }
 
-
 }

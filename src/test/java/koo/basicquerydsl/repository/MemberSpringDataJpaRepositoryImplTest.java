@@ -3,6 +3,7 @@ package koo.basicquerydsl.repository;
 import koo.basicquerydsl.dto.MemberSearchCondition;
 import koo.basicquerydsl.dto.MemberTeamDto;
 import koo.basicquerydsl.entity.Member;
+import koo.basicquerydsl.entity.QMember;
 import koo.basicquerydsl.entity.Team;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;

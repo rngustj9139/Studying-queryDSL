@@ -1,6 +1,7 @@
 package koo.basicquerydsl.repository;
 
 import koo.basicquerydsl.entity.Member;
+import koo.basicquerydsl.entity.QMember;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +39,20 @@ class MemberSprinDataJpaRepositoryTest {
         List<Member> result2 = memberSprinDataJpaRepository.findByUsername("member1");
 
         Assertions.assertThat(result2).containsExactly(member);
+    }
+
+    /**
+     * Spring Data Jpa가 제공하는 QueryDSL 기능 (한계점: 조인이 불가능하다.)
+     */
+    @Test
+    public void querydslPredicateExecutorTest() { // MemberSpringDataJpaRepository에 QuerydslPredicateExecutor<Member> 추가해야함
+        QMember member = QMember.member;
+
+        Iterable<Member> result = memberSprinDataJpaRepository.findAll(member.age.between(10, 40).and(member.username.eq("member1")));
+
+        for (Member findedMember : result) {
+            System.out.println("member1 = " + findedMember);
+        }
     }
 
 }
